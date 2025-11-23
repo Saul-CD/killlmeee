@@ -14,7 +14,6 @@ async function cargarCatalogo(reset = false) {
         UI.showLoading(true);
         var productos = await Store.load(reset);
         aplicarFiltros();
-        UI.renderProducts(productos, !reset, currentUser);
     } catch (e) {
         console.error("Error cargando catálogo", e);
     } finally {
