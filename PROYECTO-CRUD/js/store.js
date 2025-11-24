@@ -13,11 +13,13 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 export const Store = {
-    products: [],
+    productos: [],
 
-    add: async (data) => await addDoc(collection(db, "productos"), data),
-    load: async (reset = false) => {
-        if (reset) Store.products = [];
+    // C
+    agregar: async (data) => await addDoc(collection(db, "productos"), data),
+    // R
+    cargar: async (reset = false) => {
+        if (reset) Store.productos = [];
 
         let q = query(collection(db, "productos"));
 
@@ -25,9 +27,11 @@ export const Store = {
         if (snap.empty) return [];
 
         const newProds = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        Store.products = [...Store.products, ...newProds];
+        Store.productos = [...Store.productos, ...newProds];
         return newProds;
     },
-    update: async (id, data) => await updateDoc(doc(db, "productos", id), data),
-    delete: async (id) => await deleteDoc(doc(db, "productos", id)),
+    // U
+    actualizar: async (id, data) => await updateDoc(doc(db, "productos", id), data),
+    // D
+    eliminar: async (id) => await deleteDoc(doc(db, "productos", id)),
 };

@@ -9,15 +9,15 @@ let currentUser = null;
 let imagenesTemporales = [];
 
 // --- Carga Inicial ---
-async function cargarCatalogo(reset = false) {
+async function cargarCatalogo() {
     try {
-        UI.showLoading(true);
-        var productos = await Store.load(reset);
+        UI.estaCargando(true);
+        await Store.cargar(true);
         aplicarFiltros();
     } catch (e) {
         console.error("Error cargando catálogo", e);
     } finally {
-        UI.showLoading(false);
+        UI.estaCargando(false);
     }
 }
 
@@ -42,29 +42,29 @@ window.cerrarSesion = async () => {
 
 // --- Carrito ---
 window.agregarCarrito = (id) => {
-    const p = Store.products.find((x) => x.id === id);
+    const p = Store.productos.find((x) => x.id === id);
     if (p) {
-        Cart.add(p);
+        Cart.agregar(p);
         M.toast({ html: "Añadido al carrito", classes: "green rounded" });
     }
 };
 
 window.abrirCarrito = () => {
-    Cart.renderModal();
+    Cart.mostrarModal();
     M.Modal.getInstance(document.getElementById("modalCarrito")).open();
 };
 
 window.updateCart = (id, n) => {
-    Cart.update(id, n);
-    Cart.renderModal();
+    Cart.actualizar(id, n);
+    Cart.mostrarModal();
 };
 
 window.finalizarCompra = () => {
     const items = Cart.items;
     if (!items.length) return M.toast({ html: "Carrito vacío" });
     let msg = "Hola, quiero pedir:\n";
-    items.forEach((i) => (msg += `- ${i.nombre} (${i.qty})\n`));
-    window.open(`https://wa.me/5215518675722?text=${encodeURIComponent(msg)}`, "_blank");
+    items.forEach((producto) => (msg += `- ${producto.nombre} (${producto.qty})\n`));
+    window.open(`https://wa.me/525547879577?text=${encodeURIComponent(msg)}`, "_blank");
 };
 
 // Gestión de Imágenes (Uno por uno) ---
@@ -117,7 +117,7 @@ window.abrirModalAgregar = () => {
 };
 
 window.editarProducto = (id) => {
-    const p = Store.products.find((x) => x.id === id);
+    const p = Store.productos.find((x) => x.id === id);
     if (!p) return;
     window.productoEditandoId = id;
 
@@ -127,7 +127,7 @@ window.editarProducto = (id) => {
     document.getElementById("descripcion").value = p.descripcion;
     document.getElementById("categoria").value = p.categoria;
 
-    imagenesTemporales = p.imagenes && p.imagenes.length ? [...p.imagenes] : p.imagen ? [p.imagen] : [];
+    imagenesTemporales = p.imagenes;
     renderizarListaImagenes();
 
     M.updateTextFields();
@@ -156,47 +156,45 @@ window.guardarProducto = async () => {
         stock: stock,
         descripcion: document.getElementById("descripcion").value,
         imagenes: imagenesTemporales,
-        imagen: imagenesTemporales[0] || "",
     };
 
     try {
-        UI.showLoading(true);
-        if (window.productoEditandoId) await Store.update(window.productoEditandoId, data);
-        else await Store.add(data);
+        UI.estaCargando(true);
+        if (window.productoEditandoId) await Store.actualizar(window.productoEditandoId, data);
+        else await Store.agregar(data);
 
         M.Modal.getInstance(document.getElementById("modalProducto")).close();
-        await cargarCatalogo(true);
+        await cargarCatalogo();
         M.toast({ html: "Guardado correctamente", classes: "green" });
     } catch (e) {
         console.error(e);
         M.toast({ html: "Error al guardar", classes: "red" });
     } finally {
-        UI.showLoading(false);
+        UI.estaCargando(false);
     }
 };
 
 window.eliminarProducto = async (id) => {
     if (confirm("¿Eliminar producto?")) {
-        await Store.delete(id);
-        await cargarCatalogo(true);
+        await Store.eliminar(id);
+        await cargarCatalogo();
     }
 };
 
 window.verDetalle = (id) => {
-    const p = Store.products.find((item) => item.id === id);
+    const p = Store.productos.find((item) => item.id === id);
     if (!p) return;
 
     document.getElementById("detalleNombre").innerText = p.nombre;
     document.getElementById("detallePrecio").innerText = `$${Number(p.precio).toFixed(2)}`;
-    document.getElementById("detalleCategoria").innerText = p.categoria;
+    document.getElementById("detalleCategoria").innerText = p.categoria || "General";
     document.getElementById("detalleStock").innerText = `Stock: ${p.stock || 0}`;
     document.getElementById("detalleDescripcion").innerText = p.descripcion || "Sin descripción";
 
     const carruselContainer = document.getElementById("carruselProducto");
     if (carruselContainer) {
         let htmlImagenes = "";
-        let imagenesParaMostrar =
-            p.imagenes && p.imagenes.length > 0 ? p.imagenes : [p.imagen || "https://via.placeholder.com/400"];
+        let imagenesParaMostrar = p.imagenes;
 
         imagenesParaMostrar.forEach((url) => {
             htmlImagenes += `<a class="carousel-item" href="#!"><img src="${url}"></a>`;
@@ -206,9 +204,12 @@ window.verDetalle = (id) => {
         // Destruir instancia previa si existe e inicializar nueva
         const instance = M.Carousel.getInstance(carruselContainer);
         if (instance) instance.destroy();
-
         setTimeout(() => {
-            M.Carousel.init(carruselContainer, { fullWidth: true, indicators: true });
+            M.Carousel.init(carruselContainer, {
+                fullWidth: true,
+                indicators: true,
+                duration: 200,
+            });
         }, 100);
     }
 
@@ -225,22 +226,22 @@ window.verDetalle = (id) => {
 
 window.aplicarFiltros = () => {
     const texto = document.getElementById("busqueda").value.toLowerCase();
-    const catFilter = document.getElementById("filtroCategoria").value; // Select nuevo
+    const categoria = document.getElementById("filtroCategoria").value; // Select nuevo
     const orden = document.getElementById("ordenamiento").value; // Select nuevo
 
-    let resultado = [...Store.products];
+    let resultado = [...Store.productos];
 
-    // 1. Filtro Texto
+    // Filtro Texto
     if (texto) {
         resultado = resultado.filter((p) => p.nombre.toLowerCase().includes(texto));
     }
 
-    // 2. Filtro Categoría
-    if (catFilter && catFilter !== "todos") {
-        resultado = resultado.filter((p) => p.categoria === catFilter);
+    // Filtro Categoría
+    if (categoria && categoria !== "todos") {
+        resultado = resultado.filter((p) => p.categoria === categoria);
     }
 
-    // 3. Ordenamiento
+    // Ordenamiento
     resultado.sort((a, b) => {
         if (orden === "nombre_asc") return a.nombre.localeCompare(b.nombre);
         if (orden === "nombre_desc") return b.nombre.localeCompare(a.nombre);
@@ -249,8 +250,7 @@ window.aplicarFiltros = () => {
         return 0;
     });
 
-    // 4. Renderizar
-    UI.renderProducts(resultado, false, currentUser);
+    UI.mostrarProductos(resultado, currentUser);
 };
 
 window.togglePassword = () => {
@@ -267,10 +267,11 @@ window.togglePassword = () => {
 
 // Inicialización
 document.addEventListener("DOMContentLoaded", async () => {
-    // Inicializar existentes
+    // Listeners
     document.querySelector("#btn_iniciarSesion").addEventListener("click", window.iniciarSesion);
     document.querySelector("#btn_cerrarSesion").addEventListener("click", window.cerrarSesion);
     document.querySelector("#btn_abrirCarrito").addEventListener("click", window.abrirCarrito);
+    document.querySelector("#footer_abrirCarrito").addEventListener("click", window.abrirCarrito);
     document.querySelector("#btn_finalizarCompra").addEventListener("click", window.finalizarCompra);
     document.querySelector("#btn_abrirModalAgregar").addEventListener("click", window.abrirModalAgregar);
     document.querySelector("#btn_guardarProducto").addEventListener("click", window.guardarProducto);
@@ -291,21 +292,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         const adminPanel = document.getElementById("adminPanelContainer");
         const loginBtnLi = document.getElementById("btnLoginLi");
         const logoutBtnLi = document.getElementById("btnLogoutLi");
-        const cartFab = document.querySelector(".fixed-action-btn");
 
         if (user) {
+            // Es admin
             if (adminPanel) adminPanel.style.display = "block";
             if (loginBtnLi) loginBtnLi.style.display = "none";
             if (logoutBtnLi) logoutBtnLi.style.display = "block";
-            if (cartFab) cartFab.style.display = "none";
         } else {
+            // No es admin
             if (adminPanel) adminPanel.style.display = "none";
             if (loginBtnLi) loginBtnLi.style.display = "block";
             if (logoutBtnLi) logoutBtnLi.style.display = "none";
-            if (cartFab) cartFab.style.display = "block";
         }
 
         // Recargar catálogo para mostrar botones de edición si es admin
-        cargarCatalogo(false);
+        cargarCatalogo();
     });
 });

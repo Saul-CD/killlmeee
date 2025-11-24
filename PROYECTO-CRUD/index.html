@@ -132,6 +132,79 @@
             </a>
             <span class="cart-badge" id="cartCount">0</span>
         </div>
+
+        <!-- Efecto de onda -->
+        <div style="height: 150px; overflow: hidden; margin-bottom: -10px">
+            <svg viewBox="0 0 500 150" preserveAspectRatio="none" style="height: 100%; width: 100%">
+                <path
+                    d="M0.00,49.98 C149.99,150.00 349.20,-49.98 500.00,49.98 L500.00,150.00 L0.00,150.00 Z"
+                    style="stroke: none; fill: #212121"
+                ></path>
+            </svg>
+        </div>
+
+        <!-- Footer -->
+        <footer class="page-footer grey darken-4">
+            <div class="container">
+                <div class="row">
+                    <div class="col l6 s12">
+                        <h5 class="white-text" style="display: flex; align-items: center">
+                            <i class="material-icons orange-text text-darken-2" style="margin-right: 10px">store</i>
+                            Tienda-CRUD
+                        </h5>
+                        <p class="grey-text text-lighten-4">
+                            La mejor tecnología y productos a tu alcance. Administramos calidad, entregamos felicidad.
+                        </p>
+                        <div style="margin-top: 20px">
+                            <a class="btn-floating btn-small transparent z-depth-0 waves-effect"
+                                ><i class="material-icons white-text">facebook</i></a
+                            >
+                            <a class="btn-floating btn-small transparent z-depth-0 waves-effect"
+                                ><i class="material-icons white-text">camera_alt</i></a
+                            >
+                            <a class="btn-floating btn-small transparent z-depth-0 waves-effect"
+                                ><i class="material-icons white-text">alternate_email</i></a
+                            >
+                        </div>
+                    </div>
+
+                    <div class="col l4 offset-l2 s12">
+                        <h5 class="white-text">Enlaces Rápidos</h5>
+                        <ul>
+                            <li>
+                                <a class="grey-text text-lighten-3 hover-line" href="#!" id="footer_abrirCarrito"
+                                    >Ver Carrito</a
+                                >
+                            </li>
+                            <li>
+                                <a class="grey-text text-lighten-3 hover-line modal-trigger" href="#modalLogin"
+                                    >Zona Admin</a
+                                >
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-copyright black">
+                <div class="container center-align grey-text text-darken-1">
+                    2025 Tienda-CRUD - Diseñado con Materialize
+                </div>
+            </div>
+        </footer>
+
+        <style>
+            /* Efecto hover simple para los enlaces del footer */
+            .hover-line {
+                text-decoration: none;
+                position: relative;
+                transition: color 0.3s;
+            }
+            .hover-line:hover {
+                color: #f57c00 !important;
+                padding-left: 5px;
+            }
+        </style>
         <!-- FIN DEL CONTENIDO FIJO -->
 
         <!-- PANTALLAS Y MENUS EMERGENTES -->
@@ -165,7 +238,6 @@
                         <i class="material-icons prefix" style="color: #333">person</i>
                         <input type="text" id="loginUser" placeholder="admin" />
                         <label for="loginUser" class="active">Nombre de Usuario</label>
-                        <span class="helper-text center-align" style="color: #888">Sin @tienda.com</span>
                     </div>
 
                     <!-- Contraseña -->
