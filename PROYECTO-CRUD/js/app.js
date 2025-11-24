@@ -313,17 +313,20 @@ document.addEventListener("DOMContentLoaded", async () => {
         const adminPanel = document.getElementById("adminPanelContainer");
         const loginBtnLi = document.getElementById("btnLoginLi");
         const logoutBtnLi = document.getElementById("btnLogoutLi");
+        const cartFab = document.querySelector(".fixed-action-btn");
 
         if (user) {
             // Es admin
             if (adminPanel) adminPanel.style.display = "block";
             if (loginBtnLi) loginBtnLi.style.display = "none";
             if (logoutBtnLi) logoutBtnLi.style.display = "block";
+            if (cartFab) cartFab.style.display = "none";
         } else {
             // No es admin
             if (adminPanel) adminPanel.style.display = "none";
             if (loginBtnLi) loginBtnLi.style.display = "block";
             if (logoutBtnLi) logoutBtnLi.style.display = "none";
+            if (cartFab) cartFab.style.display = "block";
         }
 
         // Recargar catálogo para mostrar botones de edición si es admin

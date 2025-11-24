@@ -34,6 +34,7 @@ export const UI = {
                     .join("");
 
                 const display = user ? "flex" : "none";
+                const displayBuy = user ? "none" : "inline-block";
 
                 return `
                     <div class="col s12 m6 l4 producto" id="prod-${p.id}">
@@ -45,7 +46,7 @@ export const UI = {
                                 </div>
 
                                 <a class="btn-floating halfway-fab orange darken-2" 
-                                style="display: inline-block"
+                                style="display: ${displayBuy}"
                                 onclick="window.agregarCarrito('${p.id}')">
                                     <i class="material-icons">add_shopping_cart</i>
                                 </a>
@@ -82,7 +83,7 @@ export const UI = {
             .join("");
 
         container.innerHTML = html;
-        
+
         // Inicializar carouseles
         setTimeout(() => {
             const carruseles = container.querySelectorAll(".carousel");
