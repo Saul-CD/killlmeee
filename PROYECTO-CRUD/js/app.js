@@ -14,6 +14,7 @@ async function cargarCatalogo() {
         UI.estaCargando(true);
         await Store.cargar(true);
         aplicarFiltros();
+        window.actualizarAutocomplete();
     } catch (e) {
         console.error("Error cargando catálogo", e);
     } finally {
@@ -263,6 +264,26 @@ window.togglePassword = () => {
         input.type = "password";
         icon.innerText = "visibility_off";
     }
+};
+
+window.actualizarAutocomplete = () => {
+    const input = document.getElementById("busqueda");
+
+    let dataAutocomplete = {};
+
+    Store.productos.forEach((p) => {
+        let img = p.imagenes[0];
+        dataAutocomplete[p.nombre] = img;
+    });
+
+    M.Autocomplete.init(input, {
+        data: dataAutocomplete,
+        limit: 5,
+        minLength: 1,
+        onAutocomplete: function () {
+            window.aplicarFiltros();
+        },
+    });
 };
 
 // Inicialización
